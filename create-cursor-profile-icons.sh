@@ -38,11 +38,13 @@ make_icon() {
 }
 
 # Letter and background hex colour per profile (edit as needed)
+# Example: Personal = P blue, Spireworks = S green, Durst = D orange
 for profile in $PROFILES; do
   case "$profile" in
-    Personal) make_icon "$profile" "P" "#2563eb" ;;
-    Work)     make_icon "$profile" "W" "#16a34a" ;;
-    *)        make_icon "$profile" "$(echo "$profile" | cut -c1)" "#64748b" ;;
+    Personal)   make_icon "$profile" "P" "#2563eb" ;;
+    Spireworks) make_icon "$profile" "S" "#059669" ;;
+    Durst)      make_icon "$profile" "D" "#ea580c" ;;
+    *)          make_icon "$profile" "$(echo "$profile" | cut -c1)" "#64748b" ;;
   esac
 done
 

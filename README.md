@@ -7,7 +7,7 @@ Based on [Seamless account switching in Cursor](https://forum.cursor.com/t/seaml
 ## Quick start
 
 1. **Clone this repo** (or copy the folder) somewhere, e.g. `~/cursor-profiles`.
-2. **Edit profile names** in `config.sh` if you want (default: `Personal`, `Work`).
+2. **Edit profile names** in `config.sh` if you want. Default example: `Personal`, `Spireworks`, `Durst` (with matching P/S/D icons included).
 3. **Run setup** (macOS):
    ```bash
    cd ~/cursor-profiles
@@ -22,15 +22,15 @@ Based on [Seamless account switching in Cursor](https://forum.cursor.com/t/seaml
 
 ## Usage
 
-- **CLI:** `cursor-personal`, `cursor-work` (or whatever names you set in `config.sh`). Pass a path to open that folder: `cursor-work .` or `cursor-personal ~/projects/myapp`.
+- **CLI:** `cursor-personal`, `cursor-spireworks`, `cursor-durst` (or whatever names you set in `config.sh`). Pass a path to open that folder: `cursor-spireworks .` or `cursor-personal ~/projects/myapp`.
 - **Launchers:** Use the apps in `~/Applications/Cursor/` from Spotlight or the Dock; each opens Cursor with that profile’s data dir.
 
 ## Icons
 
-Launcher apps use profile-specific icons if present: put `<ProfileName>.icns` in `cursor-profiles/icons/` (e.g. `Personal.icns`, `Work.icns`), then run `./setup-cursor-profiles.sh` again.
+This repo includes example icons for Personal (P, blue), Spireworks (S, green), and Durst (D, orange) in `cursor-profiles/icons/` (`.icns` + source `.png`). Run `./setup-cursor-profiles.sh` to apply them to the launcher apps.
 
-- **From a PNG:** Put a 1024×1024 PNG in `cursor-profiles/icons/<Name>.png`, then run `./png-to-icns.sh <Name>` (macOS only).
-- **Simple letter icons:** Run `./create-cursor-profile-icons.sh` (requires ImageMagick). It creates basic letter icons; edit the script to change letters/colours.
+- **Your own icons:** Put `<ProfileName>.icns` in `cursor-profiles/icons/`, or a 1024×1024 `<Name>.png` and run `./png-to-icns.sh <Name>` (macOS only).
+- **Regenerate letter icons:** Run `./create-cursor-profile-icons.sh` (requires ImageMagick). Edit the script to change letters/colours per profile.
 
 ## Migrating chat history
 

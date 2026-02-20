@@ -1,2 +1,2 @@
-# Add <ProfileName>.icns here (e.g. Personal.icns, Work.icns), then run setup-cursor-profiles.sh again.
-# Optional: add <Name>.png (1024×1024) and run png-to-icns.sh <Name>.
+# Example icons included: Personal.icns, Spireworks.icns, Durst.icns (and .png sources).
+# Add your own <ProfileName>.icns or <Name>.png (1024×1024) + png-to-icns.sh <Name>, then run setup-cursor-profiles.sh again.
