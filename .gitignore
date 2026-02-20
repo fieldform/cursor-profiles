@@ -1,0 +1,8 @@
+# Profile data (created by setup; don't commit personal/workspace state)
+cursor-profiles/Personal/
+cursor-profiles/Work/
+cursor-profiles/*/config/
+# Keep icons dir but ignore large binaries if you add custom ones and don't want to commit
+# cursor-profiles/icons/*.icns
+# cursor-profiles/icons/*.png
+.DS_Store
