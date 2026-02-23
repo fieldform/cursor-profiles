@@ -61,11 +61,13 @@ EOF
 
   cat > "$app_dir/Contents/MacOS/Launcher" << LAUNCHER
 #!/bin/bash
-exec "$CURSOR_BIN" \\
+# Run Cursor as child so this .app stays the process owner (better restore-after-reboot).
+# No stdio redirection so remote/SSH sessions don't hang on disconnected pipes.
+"$CURSOR_BIN" \\
   --user-data-dir="$user_data_dir" \\
   --extensions-dir="$extensions_dir" \\
   --new-window \\
-  "\$@" </dev/null >/dev/null 2>&1
+  "\$@"
 LAUNCHER
   chmod +x "$app_dir/Contents/MacOS/Launcher"
 
