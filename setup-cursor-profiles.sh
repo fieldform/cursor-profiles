@@ -12,10 +12,36 @@ CURSOR_PROFILES_REPO="${CURSOR_PROFILES_REPO:-$REPO_ROOT/cursor-profiles}"
 CURSOR_LAUNCHERS="${CURSOR_LAUNCHERS:-${HOME}/Applications/Cursor}"
 CURSOR_APP="${CURSOR_APP:-/Applications/Cursor.app}"
 CURSOR_BIN="${CURSOR_APP}/Contents/MacOS/Cursor"
+LAUNCHER_SOURCE="${LAUNCHER_SOURCE:-$REPO_ROOT/native-launcher/Launcher.swift}"
+SWIFTC_BIN="${SWIFTC_BIN:-}"
+MACOS_SDK_PATH="${MACOS_SDK_PATH:-}"
 unset PROFILES_OVERRIDE
 
 if [[ ! -x "$CURSOR_BIN" ]]; then
   echo "⚠️  Cursor not found at $CURSOR_APP. Install Cursor first."
+  exit 1
+fi
+
+if [[ -z "$SWIFTC_BIN" ]] && command -v xcrun >/dev/null 2>&1; then
+  SWIFTC_BIN="$(xcrun --find swiftc 2>/dev/null || true)"
+fi
+
+if [[ -z "$MACOS_SDK_PATH" ]] && command -v xcrun >/dev/null 2>&1; then
+  MACOS_SDK_PATH="$(xcrun --show-sdk-path --sdk macosx 2>/dev/null || true)"
+fi
+
+if [[ ! -f "$LAUNCHER_SOURCE" ]]; then
+  echo "⚠️  Native launcher source not found at $LAUNCHER_SOURCE."
+  exit 1
+fi
+
+if [[ -z "$SWIFTC_BIN" || ! -x "$SWIFTC_BIN" ]]; then
+  echo "⚠️  Swift compiler not found. Install Xcode or Command Line Tools first."
+  exit 1
+fi
+
+if [[ -z "$MACOS_SDK_PATH" || ! -d "$MACOS_SDK_PATH" ]]; then
+  echo "⚠️  macOS SDK not found. Install Xcode or Command Line Tools first."
   exit 1
 fi
 
@@ -27,6 +53,21 @@ for profile in $PROFILES; do
   mkdir -p "$CURSOR_PROFILES_REPO/$profile/config/extensions"
   echo "   ✓ $CURSOR_PROFILES_REPO/$profile/config"
 done
+
+build_launcher_binary() {
+  local output_path="$1"
+
+  SDKROOT="$MACOS_SDK_PATH" "$SWIFTC_BIN" \
+    -O \
+    -framework AppKit \
+    -framework Foundation \
+    "$LAUNCHER_SOURCE" \
+    -o "$output_path"
+}
+
+tmp_launcher_binary="$(mktemp "$REPO_ROOT/.launcher.XXXXXX")"
+trap 'rm -f "$tmp_launcher_binary"' EXIT
+build_launcher_binary "$tmp_launcher_binary"
 
 make_launcher() {
   local profile="$1"
@@ -56,6 +97,8 @@ make_launcher() {
     <string>${app_name}</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>
@@ -71,6 +114,12 @@ make_launcher() {
             </array>
         </dict>
     </array>
+    <key>CursorBinaryPath</key>
+    <string>${CURSOR_BIN}</string>
+    <key>CursorUserDataDir</key>
+    <string>${user_data_dir}</string>
+    <key>CursorExtensionsDir</key>
+    <string>${extensions_dir}</string>
     <key>LSMinimumSystemVersion</key>
     <string>10.15</string>
     <key>NSHighResolutionCapable</key>
@@ -79,16 +128,7 @@ make_launcher() {
 </plist>
 EOF
 
-  cat > "$app_dir/Contents/MacOS/Launcher" << LAUNCHER
-#!/bin/bash
-# Run Cursor as child so this .app stays the process owner (better restore-after-reboot).
-# No stdio redirection so remote/SSH sessions don't hang on disconnected pipes.
-"$CURSOR_BIN" \\
-  --user-data-dir="$user_data_dir" \\
-  --extensions-dir="$extensions_dir" \\
-  --new-window \\
-  "\$@"
-LAUNCHER
+  cp "$tmp_launcher_binary" "$app_dir/Contents/MacOS/Launcher"
   chmod +x "$app_dir/Contents/MacOS/Launcher"
 
   local icon_src="$CURSOR_PROFILES_REPO/icons/${profile}.icns"
