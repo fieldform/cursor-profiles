@@ -5,12 +5,14 @@
 
 set -e
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROFILES_OVERRIDE="${PROFILES-}"
 [[ -f "$REPO_ROOT/config.sh" ]] && source "$REPO_ROOT/config.sh"
-PROFILES="${PROFILES:-Personal Work}"
-CURSOR_PROFILES_REPO="$REPO_ROOT/cursor-profiles"
-CURSOR_LAUNCHERS="${HOME}/Applications/Cursor"
-CURSOR_APP="/Applications/Cursor.app"
+PROFILES="${PROFILES_OVERRIDE:-${PROFILES:-Personal Work}}"
+CURSOR_PROFILES_REPO="${CURSOR_PROFILES_REPO:-$REPO_ROOT/cursor-profiles}"
+CURSOR_LAUNCHERS="${CURSOR_LAUNCHERS:-${HOME}/Applications/Cursor}"
+CURSOR_APP="${CURSOR_APP:-/Applications/Cursor.app}"
 CURSOR_BIN="${CURSOR_APP}/Contents/MacOS/Cursor"
+unset PROFILES_OVERRIDE
 
 if [[ ! -x "$CURSOR_BIN" ]]; then
   echo "⚠️  Cursor not found at $CURSOR_APP. Install Cursor first."
@@ -32,6 +34,7 @@ make_launcher() {
   local app_dir="$CURSOR_LAUNCHERS/${app_name}.app"
   local user_data_dir="$CURSOR_PROFILES_REPO/$profile/config"
   local extensions_dir="$user_data_dir/extensions"
+  local bundle_id="com.cursor.$(echo "$profile" | tr '[:upper:]' '[:lower:]' | tr -d ' ')"
 
   mkdir -p "$app_dir/Contents/MacOS"
   mkdir -p "$app_dir/Contents/Resources"
@@ -43,14 +46,31 @@ make_launcher() {
 <dict>
     <key>CFBundleExecutable</key>
     <string>Launcher</string>
+    <key>CFBundleDisplayName</key>
+    <string>${app_name}</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
-    <string>com.cursor.$(echo "$profile" | tr '[:upper:]' '[:lower:]' | tr -d ' ')</string>
+    <string>${bundle_id}</string>
     <key>CFBundleName</key>
     <string>${app_name}</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Folder</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Default</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.folder</string>
+            </array>
+        </dict>
+    </array>
     <key>LSMinimumSystemVersion</key>
     <string>10.15</string>
     <key>NSHighResolutionCapable</key>
