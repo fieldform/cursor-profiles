@@ -18,7 +18,7 @@ assert_eq() {
 }
 
 test_setup_writes_folder_document_type() {
-  local tmp_dir fake_cursor_app fake_cursor_bin launchers_dir profiles_dir plist plist_dump
+  local tmp_dir fake_cursor_app fake_cursor_bin launchers_dir profiles_dir plist plist_dump launcher_binary binary_description
 
   tmp_dir="$(mktemp -d)"
   fake_cursor_app="$tmp_dir/Cursor.app"
@@ -41,9 +41,14 @@ EOF
     "$REPO_ROOT/setup-cursor-profiles.sh" >/dev/null
 
   plist="$launchers_dir/Cursor Spec.app/Contents/Info.plist"
+  launcher_binary="$launchers_dir/Cursor Spec.app/Contents/MacOS/Launcher"
   plist_dump="$(plutil -p "$plist")"
+  binary_description="$(file "$launcher_binary")"
 
   [[ "$plist_dump" == *'"public.folder"'* ]] || fail "launcher plist should advertise folder support"
+  [[ "$plist_dump" == *"\"CursorBinaryPath\" => \"$fake_cursor_bin\""* ]] || fail "launcher plist should point to the configured Cursor binary"
+  [[ "$plist_dump" == *'"CursorUserDataDir"'* ]] || fail "launcher plist should include the user data dir"
+  [[ "$binary_description" != *"shell script"* ]] || fail "launcher should be a native executable"
 
   rm -rf "$tmp_dir"
 }
