@@ -31,7 +31,11 @@ cursor-profile() {
   shift
   local resolved=()
   while IFS= read -r -d '' x; do resolved+=( "$x" ); done < <(_cursor_resolve_args "$@")
-  open -a "$_cursor_apps/Cursor ${profile}.app" --args "${resolved[@]}"
+  if [ ${#resolved[@]} -eq 0 ]; then
+    open -a "$_cursor_apps/Cursor ${profile}.app"
+  else
+    open -n -a "$_cursor_apps/Cursor ${profile}.app" --args "${resolved[@]}"
+  fi
 }
 
 # One function per profile (so you get cursor-personal, cursor-work, etc.)
