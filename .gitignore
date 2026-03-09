@@ -7,3 +7,6 @@ cursor-profiles/*/config/
 # cursor-profiles/icons/*.icns
 # cursor-profiles/icons/*.png
 .DS_Store
+
+test-launcher
+.specstory/
